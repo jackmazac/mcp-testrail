@@ -37,14 +37,15 @@ jobs:
 
       - name: install
         run: npm ci
+
+      - name: Upgrade npm
+        run: npm install -g npm@latest
       
       - name: build
         run: npm run build
       
-      - name: Publish to NPM
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish to npm
+        run: npm publish --provenance --access public
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
