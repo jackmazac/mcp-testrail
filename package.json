@@ -47,5 +47,10 @@
   },
   "bin": {
     "mcp-testrail": "./dist/stdio.js"
-  }
+  },
+  "repository": {
+		"type": "git",
+		"url": "git+https://github.com/bun913/zephyr-api-client.git"
+	},
+	"license": "MIT"
 }
