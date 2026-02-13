@@ -19,6 +19,16 @@ The TestRail MCP server provides the following tools:
 | **Milestones** | `getMilestones` |
 | **Shared Steps** | `getSharedSteps` |
 
+## Jira-to-TestRail Workflow (This Fork)
+
+This fork includes a Cursor subagent and domain knowledge for automating Jira ticket → TestRail test case linking:
+
+- **Subagent**: `.cursor/agents/testrail-linker.md` — orchestrates the workflow with human-in-the-loop approval
+- **Domain knowledge**: `.cursor/agents/testrail-knowledge.md` — CMS/MAM section mapping for FOX_MC_UNIFIEDAPP
+- **Install skill**: `.cursor/skills/install-testrail-jira-workflow/` — onboarding setup
+
+**Quick setup**: Clone, run `bun install && bun run build`, copy `.cursor/mcp.json.example` to `.cursor/mcp.json`, add your TestRail credentials. See the install skill for full steps.
+
 ## Usage
 
 You can connect this MCP server by setting like the below. This method uses `npx` to automatically download and run the latest version of the package, eliminating the need for local installation.
