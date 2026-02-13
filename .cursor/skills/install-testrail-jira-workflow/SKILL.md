@@ -17,7 +17,7 @@ This repo is self-contained: clone it and you get the MCP code, subagent, and do
 - Node.js >= 20.18.1 (or Bun)
 - Git
 - TestRail API key (Settings > My Settings > API Keys in TestRail)
-- For Atlassian MCP: either OAuth (remote) or API token (sooperset)
+- For Atlassian MCP: OAuth (remote at mcp.atlassian.com)
 
 ---
 
@@ -50,27 +50,11 @@ cp .cursor/mcp.json.example .cursor/mcp.json
 Edit `.cursor/mcp.json` and replace `YOUR_EMAIL@company.com` and `YOUR_API_KEY` with your TestRail credentials.
 The `args` use `dist/stdio.js` (relative to repo root). Never commit `mcp.json` — it's in `.gitignore`.
 
-**Atlassian MCP** (add only if not already present):
-
-**Option A — Remote (OAuth):** User connects via browser. Add to config:
+**Atlassian MCP** (add only if not already present): User connects via browser OAuth. Add to config:
 
 ```json
 "atlassian": {
   "url": "https://mcp.atlassian.com/v1/sse"
-}
-```
-
-**Option B — Local (API token):** Use [sooperset/mcp-atlassian](https://github.com/sooperset/mcp-atlassian):
-
-```json
-"mcp-atlassian": {
-  "command": "uvx",
-  "args": ["mcp-atlassian"],
-  "env": {
-    "JIRA_URL": "https://your-company.atlassian.net",
-    "JIRA_USERNAME": "your.email@company.com",
-    "JIRA_API_TOKEN": "your_api_token"
-  }
 }
 ```
 
