@@ -1,10 +1,43 @@
-# TestRail MCP Server
+# TestRail MCP Server — Fox Corporation
 
-This Model Context Protocol (MCP) server provides tools for interacting with TestRail directly from Claude AI and other MCP-supported clients like Cursor. It allows you to manage test cases, projects, suites, runs, and more without leaving your conversation with the AI.
+Model Context Protocol (MCP) server for Fox’s TestRail instance ([myfox.testrail.io](https://myfox.testrail.io/)). Use it from Cursor or other MCP clients to manage test cases, projects, suites, and runs from the chat.
+
+## Jira-to-TestRail Workflow
+
+This fork automates linking Jira tickets to TestRail test cases for the **FOX_MC_UNIFIEDAPP** project (CMS + MAM). It reduces the per-ticket time from about 30–60 minutes to a few minutes, with human approval at each step.
+
+**Flow**: Get Jira ticket → Find test suite in TestRail → Create test in the correct suite → Link to Jira ticket
+
+**Includes**:
+- **Subagent** (`.cursor/agents/testrail-linker.md`) — Runs the workflow with human-in-the-loop approval
+- **Domain knowledge** (`.cursor/agents/testrail-knowledge.md`) — CMS and MAM section mapping for FOX_MC_UNIFIEDAPP
+- **Install skill** (`.cursor/skills/install-testrail-jira-workflow/`) — Setup instructions for new team members
+
+**Quick setup**: Clone, run `bun install && bun run build`, copy `.cursor/mcp.json.example` to `.cursor/mcp.json`, add your TestRail credentials. Ensure the Atlassian MCP is configured for Jira access.
+
+## Fox Configuration
+
+For Fox’s TestRail instance, use:
+
+```json
+{
+  "mcpServers": {
+    "testrail": {
+      "command": "node",
+      "args": ["dist/stdio.js"],
+      "env": {
+        "TESTRAIL_URL": "https://myfox.testrail.io/",
+        "TESTRAIL_USERNAME": "your.email@fox.com",
+        "TESTRAIL_API_KEY": "your-api-key"
+      }
+    }
+  }
+}
+```
+
+Get your API key: TestRail → **Settings** → **My Settings** → **API Keys**.
 
 ## Available Tools
-
-The TestRail MCP server provides the following tools:
 
 | Category | Tools |
 |----------|-------|
@@ -19,51 +52,16 @@ The TestRail MCP server provides the following tools:
 | **Milestones** | `getMilestones` |
 | **Shared Steps** | `getSharedSteps` |
 
-## Jira-to-TestRail Workflow (This Fork)
-
-This fork includes a Cursor subagent and domain knowledge for automating Jira ticket → TestRail test case linking:
-
-- **Subagent**: `.cursor/agents/testrail-linker.md` — orchestrates the workflow with human-in-the-loop approval
-- **Domain knowledge**: `.cursor/agents/testrail-knowledge.md` — CMS/MAM section mapping for FOX_MC_UNIFIEDAPP
-- **Install skill**: `.cursor/skills/install-testrail-jira-workflow/` — onboarding setup
-
-**Quick setup**: Clone, run `bun install && bun run build`, copy `.cursor/mcp.json.example` to `.cursor/mcp.json`, add your TestRail credentials. See the install skill for full steps.
-
-## Usage
-
-You can connect this MCP server by setting like the below. This method uses `npx` to automatically download and run the latest version of the package, eliminating the need for local installation.
-
-```json
-// Example configuration using npx
-{
-  "mcpServers": {
-    "testrail": {
-      "command": "npx",
-      "args": ["@bun913/mcp-testrail@latest"],
-      "env": {
-        "TESTRAIL_URL": "https://your-instance.testrail.io", // Replace with your TestRail URL
-        "TESTRAIL_USERNAME": "your-email@example.com", // Replace with your TestRail username
-        "TESTRAIL_API_KEY": "YOUR_API_KEY" // Replace with your TestRail API key
-      }
-    }
-  }
-}
-```
-
 ## Troubleshooting
 
-- **`spawn node ENOENT` errors**: Ensure that Node.js is properly installed and in your PATH.
-- **Connection issues**: Verify that the server is running and the URL is correctly configured in your MCP client.
-- **Authentication issues**: Check your TestRail API credentials in the `.env` file.
-- **SSE connection errors**: If you see `SSE error: TypeError: fetch failed: connect ECONNREFUSED`, make sure the server is running on the specified port.
-- **Your conversation is too long**: Pleae use `limit` and `offset` parameter for test cases
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+- **401 Authentication**: Regenerate your API key; use the exact email casing from your TestRail profile. Ensure the API is enabled (ask your admin if unsure).
+- **`spawn node ENOENT`**: Ensure Node.js (≥20.18.1) or Bun is installed and in your PATH.
+- **Connection issues**: Verify the MCP server starts and that `dist/stdio.js` exists after `bun run build`.
+- **Long conversations**: Use `limit` and `offset` when fetching test cases.
 
 ## Acknowledgements
 
 - [TestRail API](https://docs.testrail.techmatrix.jp/testrail/docs/702/api/)
 - [Model Context Protocol SDK](https://github.com/modelcontextprotocol/typescript-sdk)
+- Forked from [bun913/mcp-testrail](https://github.com/bun913/mcp-testrail)
 
