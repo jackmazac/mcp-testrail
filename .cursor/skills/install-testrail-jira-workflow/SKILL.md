@@ -14,7 +14,7 @@ This repo is self-contained: clone it and you get the MCP code, subagent, and do
 
 ## Prerequisites
 
-- Node.js >= 20.18.1 (or Bun)
+- Node.js >= 20.18.1
 - Git
 - TestRail API key (Settings > My Settings > API Keys in TestRail)
 - For Atlassian MCP: OAuth (remote at mcp.atlassian.com)
@@ -30,11 +30,11 @@ git clone https://github.com/jackmazac/mcp-testrail.git
 cd mcp-testrail
 ```
 
-Install and build (use Bun if available, else npm):
+Install and build:
 
 ```bash
-bun install   # or: npm install
-bun run build # or: npm run build
+npm install
+npm run build
 ```
 
 Verify: `dist/stdio.js` exists.
@@ -90,11 +90,6 @@ If using a **different TestRail instance** than myfox.testrail.io:
 
 ---
 
-## Sharing via Deeplink
+## Sharing with teammates
 
-To share this skill with teammates, use a [Cursor skill deeplink](https://cursor.com/docs/integrations/deeplinks):
-
-**Desktop:** `cursor://anysphere.cursor-deeplink/skill?name=install-testrail-jira-workflow&text=...`
-**Web:** `https://cursor.com/link/skill?name=install-testrail-jira-workflow&text=...`
-
-The `text` param should be the URL-encoded contents of this SKILL.md. Recipients will need the template files (`testrail-linker.md`, `testrail-knowledge.md`) — share the full `.cursor/skills/install-testrail-jira-workflow/` folder from the repo, or ensure they clone the project.
+Use a **prompt deeplink** so the Cursor agent performs the full setup. See the README for the link. The prompt instructs the agent to clone the repo, build, configure MCPs, and verify subagent + knowledge files. User confirms before execution.
