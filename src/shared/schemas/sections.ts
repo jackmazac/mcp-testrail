@@ -12,6 +12,29 @@ export const getSectionsSchema = {
 		.number()
 		.optional()
 		.describe("TestRail Suite ID (optional for single suite projects)"),
+	limit: z
+		.number()
+		.min(1)
+		.max(250)
+		.optional()
+		.default(250)
+		.describe("Max sections per page (default 250)"),
+	offset: z
+		.number()
+		.optional()
+		.default(0)
+		.describe("Offset for pagination"),
+};
+
+// Schema for discovering the full section tree (auto-paginates)
+export const discoverSectionsSchema = {
+	projectId: z.number().describe("TestRail Project ID"),
+	suiteId: z
+		.number()
+		.optional()
+		.describe(
+			"Suite ID (required for multi-suite projects, auto-resolved for single-suite)",
+		),
 };
 
 // Schema for adding a section
@@ -53,6 +76,7 @@ export const deleteSectionSchema = {
 // Create Zod objects from each schema
 export const GetSectionInput = z.object(getSectionSchema);
 export const GetSectionsInput = z.object(getSectionsSchema);
+export const DiscoverSectionsInput = z.object(discoverSectionsSchema);
 export const AddSectionInput = z.object(addSectionSchema);
 export const MoveSectionInput = z.object(moveSectionSchema);
 export const UpdateSectionInput = z.object(updateSectionSchema);
@@ -61,6 +85,7 @@ export const DeleteSectionInput = z.object(deleteSectionSchema);
 // Extract input types
 export type GetSectionInputType = z.infer<typeof GetSectionInput>;
 export type GetSectionsInputType = z.infer<typeof GetSectionsInput>;
+export type DiscoverSectionsInputType = z.infer<typeof DiscoverSectionsInput>;
 export type AddSectionInputType = z.infer<typeof AddSectionInput>;
 export type MoveSectionInputType = z.infer<typeof MoveSectionInput>;
 export type UpdateSectionInputType = z.infer<typeof UpdateSectionInput>;

@@ -13,6 +13,21 @@ You depend on two MCP servers being active:
 - **Atlassian MCP** (Jira): for reading ticket details
 - **TestRail MCP**: for querying suites/sections and creating test cases
 
+## Project Discovery (first-time setup)
+
+When `.cursor/agents/testrail-knowledge.md` does not exist, does not match the current project, or the user asks to "discover my project":
+
+1. Help the user identify their project ID using `getProjects` if they don't know it.
+2. Call `discoverSections(projectId)` to fetch the full section tree. This auto-paginates through all sections and returns an ASCII tree and flat section list with paths.
+3. Use the structured output to generate `.cursor/agents/testrail-knowledge.md` following this format:
+   - Header with TestRail URL, project name/ID, suite name/ID
+   - ASCII tree of the section hierarchy (from the `tree` field)
+   - Section reference table with columns: Path, Section ID, Description, Keyword Triggers
+   - Section selection rules
+4. Write the file and confirm with the user.
+
+This only needs to happen once per project. After discovery, the knowledge file is used for all subsequent ticket linking.
+
 ## Workflow
 
 When the user provides one or more Jira ticket keys (e.g., "PROJ-123" or "Link PROJ-123, PROJ-456 to TestRail"):
@@ -20,10 +35,11 @@ When the user provides one or more Jira ticket keys (e.g., "PROJ-123" or "Link P
 ### Step 1: Load Domain Knowledge
 
 Read the file `.cursor/agents/testrail-knowledge.md` to understand:
-- The TestRail project structure (CMS / MAM top-level areas)
-- The section hierarchy (Editorial > Posts, Person, Pages, etc.)
+- The TestRail project structure and section hierarchy
 - The keyword triggers for each section
 - The section selection priority rules
+
+If the knowledge file does not exist, run the Project Discovery workflow above first.
 
 ### Step 2: Fetch Jira Ticket Details
 
@@ -33,10 +49,10 @@ For each Jira ticket key provided:
 
 ### Step 3: Resolve TestRail Project and Suites
 
-1. Call `getProjects` via TestRail MCP to list available projects.
-2. If this is the first ticket in the session, present the project list and ask the user to confirm which project to use. Cache the project ID for subsequent tickets.
-3. Call `getSuites(projectId)` to get all suites in the project.
-4. Call `getSections(projectId, suiteId)` for relevant suites to get the full section tree.
+1. Use the project ID from the knowledge file, or call `getProjects` and ask the user to confirm.
+2. Call `getSuites(projectId)` to get all suites in the project.
+3. Call `getSections(projectId, suiteId, limit, offset)` to browse sections. This endpoint now supports pagination (limit max 250, default 250). If `hasMore` is true in the response, increase offset to fetch subsequent pages.
+4. For large projects, prefer using section IDs from the knowledge file directly instead of paginating through the full tree.
 
 ### Step 4: Match Ticket to Section
 

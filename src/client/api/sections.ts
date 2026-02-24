@@ -10,6 +10,20 @@ import {
 	DeleteSectionInputType,
 } from "../../shared/schemas/sections.js";
 
+interface GetSectionsParams {
+	limit?: number;
+	offset?: number;
+	[key: string]: string | number | boolean | null | undefined;
+}
+
+interface PaginatedSectionsResponse {
+	sections: TestRailSection[];
+	offset: number;
+	limit: number;
+	size: number;
+	_links: { next: string | null; prev: string | null };
+}
+
 export class SectionsClient extends BaseTestRailClient {
 	/**
 	 * Get a specific section
@@ -29,28 +43,65 @@ export class SectionsClient extends BaseTestRailClient {
 	}
 
 	/**
-	 * Get all sections for a project
+	 * Get sections for a project with pagination support
 	 */
 	async getSections(
 		projectId: GetSectionsInputType["projectId"],
 		suiteId?: GetSectionsInputType["suiteId"],
-		params?: Record<string, string | number | boolean | null | undefined>,
-	): Promise<TestRailSection[]> {
+		params?: Partial<GetSectionsParams>,
+	): Promise<PaginatedSectionsResponse> {
 		try {
 			console.log(`Getting sections for project ${projectId}`);
 			const url = `/api/v2/get_sections/${projectId}`;
-			const queryParams = suiteId ? { ...params, suite_id: suiteId } : params;
+			const defaultParams = {
+				limit: 250,
+				offset: 0,
+				...params,
+			};
+			const queryParams = suiteId
+				? { ...defaultParams, suite_id: suiteId }
+				: defaultParams;
 
-			const response = await this.client.get<TestRailSection[]>(url, {
-				params: queryParams,
-			});
-			return response.data;
+			const response =
+				await this.client.get<PaginatedSectionsResponse>(url, {
+					params: queryParams,
+				});
+
+			return {
+				sections: response.data.sections,
+				offset: response.data.offset,
+				limit: response.data.limit,
+				size: response.data.size,
+				_links: response.data._links,
+			};
 		} catch (error) {
 			throw handleApiError(
 				error,
 				`Failed to get sections for project ${projectId}`,
 			);
 		}
+	}
+
+	/**
+	 * Fetch every section in a project by auto-paginating through all pages.
+	 */
+	async getAllSections(
+		projectId: number,
+		suiteId?: number,
+	): Promise<TestRailSection[]> {
+		const all: TestRailSection[] = [];
+		let offset = 0;
+		const limit = 250;
+		while (true) {
+			const page = await this.getSections(projectId, suiteId, {
+				limit,
+				offset,
+			});
+			all.push(...page.sections);
+			if (!page._links.next) break;
+			offset += limit;
+		}
+		return all;
 	}
 
 	/**

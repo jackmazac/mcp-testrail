@@ -35,14 +35,22 @@ export function registerTestTools(
 		},
 		async (args, extra) => {
 			try {
-				const { runId } = args;
-				const tests = await testRailClient.tests.getTests(runId);
+				const { runId, limit = 50, offset = 0 } = args;
+				const result = await testRailClient.tests.getTests(runId, {
+					limit,
+					offset,
+				});
 
-				// Return full case data for individual case requests
 				const successResponse = createSuccessResponse(
 					"Tests retrieved successfully",
 					{
-						tests: tests,
+						tests: result.tests,
+						pagination: {
+							limit,
+							offset,
+							total: result.size,
+							hasMore: result._links.next !== null,
+						},
 					},
 				);
 				return {
